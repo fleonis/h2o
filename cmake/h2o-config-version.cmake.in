@@ -1,0 +1,31 @@
+set(pname @pname@)
+set(major @VERSION_MAJOR@)
+set(minor @VERSION_MINOR@)
+set(patch @VERSION_PATCH@)
+set(tweak @VERSION_TWEAK@)
+set(pack "${PACKAGE_FIND_NAME}")
+
+set(PACKAGE_VERSION "${major}.${minor}.${patch}.${tweak}")
+set(PACKAGE_VERSION_MAJOR "${major}")
+set(PACKAGE_VERSION_MINOR "${minor}")
+set(PACKAGE_VERSION_PATCH "${patch}")
+set(PACKAGE_VERSION_TWEAK "${tweak}")
+
+set(find_ver "${PACKAGE_FIND_VERSION_MAJOR}.${PACKAGE_FIND_VERSION_MINOR}")#.${PACKAGE_FIND_VERSION_PATCH}.${PACKAGE_FIND_VERSION_TWEAK}")
+set(pack_ver "${major}.${minor}")#${patch}.${tweak}")
+
+if(("${pack_ver}" VERSION_LESS "${find_ver}") OR ("${pack_ver}" VERSION_EQUAL "${find_ver}"))
+	set(PACKAGE_VERSION_COMPATIBLE TRUE)
+else()
+	set(PACKAGE_VERSION_COMPATIBLE FALSE)
+endif()
+
+if(PACKAGE_VERSION_COMPATIBLE)
+	if(	${PACKAGE_FIND_VERSION_MAJOR} EQUAL ${major}
+		AND ${PACKAGE_FIND_VERSION_MINOR} EQUAL ${minor}
+		AND ${PACKAGE_FIND_VERSION_PATCH} EQUAL ${patch}
+#		AND ${PACKAGE_FIND_VERSION_TWEAK} EQUAL ${tweak}
+	)
+		set(PACKAGE_VERSION_EXACT TRUE)
+   endif()
+endif()

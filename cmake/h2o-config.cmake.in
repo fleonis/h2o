@@ -1,0 +1,85 @@
+# Config file for the h2o package
+# It defines the following variables
+#  H2O_INCLUDE_DIR - include directories
+#  H2O_LIBRARIES   - libraries to link against
+#  H2O_RUNTIME_DIR - runtime directory
+
+
+get_filename_component(H2O_PREFIX "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
+get_filename_component(H2O_PREFIX "${H2O_PREFIX}" DIRECTORY)
+if("@PREFIX_WITH_VERSION@" STREQUAL "ON")
+	get_filename_component(H2O_PREFIX "${H2O_PREFIX}" DIRECTORY)
+endif()
+
+set(_h2o_flib_ver "@VERSION_MAJOR@.@VERSION_MINOR@")
+
+set(_h2o_idir @install_dir@)
+set(_h2o_target_prefix @lib_prefix@)
+set(h2o_runtime_dir "@install_runtime_dir@")
+set(h2o_runtime_libs_dir "@install_runtime_libs_dir@")
+set(h2o_cms_template_dir "@cms_template_dir@")
+
+set(_h2o_build_type "${CMAKE_BUILD_TYPE}")
+if(_h2o_build_type STREQUAL "")
+	set(_h2o_build_type "empty_config")
+endif()
+
+set(_h2o_prj_pref "${CMAKE_FIND_PACKAGE_NAME}")
+set(_h2o_com_pref "${H2O_PREFIX}/lib/${_h2o_idir}")
+set(_h2o_lib_pref "${H2O_PREFIX}/lib/${_h2o_idir}/${CMAKE_BUILD_TYPE}/lib")
+if(NOT EXISTS "${_h2o_lib_pref}")
+	set(_h2o_lib_pref "${H2O_PREFIX}/lib/${_h2o_idir}/Release/lib")
+endif()
+
+# the h2o cannot be shared
+set(${_h2o_prj_pref}_libh2o_USE_STATIC on)
+
+# the include dir - same for all
+set(idirs
+	"${H2O_PREFIX}/include/${_h2o_idir}"
+	"${H2O_PREFIX}/include/${_h2o_idir}/h2o/${_h2o_build_type}" )
+set(${_h2o_prj_pref}_INCLUDE_DIR  ${idirs})
+set(${_h2o_prj_pref}_INCLUDE_DIRS ${idirs})
+set(H2O_INCLUDE_DIR  ${idirs})
+set(H2O_INCLUDE_DIRS ${idirs})
+unset(idirs)
+
+# the runtime dir
+set(${_h2o_prj_pref}_RUNTIME "${H2O_PREFIX}/${h2o_runtime_dir}")
+set(H2O_RUNTIME "${_h2o_prj_pref}${CMAKE_INSTALL_DATAROOTDIR}/h2o/status")
+set(H2O_RUNTIME_DIR "${H2O_RUNTIME}")
+
+macro(append_target_to_libs component_file target sufix)
+	include(${component_file})
+	list(APPEND ${_h2o_prj_pref}_LIBRARIES "${target}")
+endmacro()
+
+macro(append_to_libs component)
+	# static or shared sufix
+	set(sufix shared)
+	if(${_h2o_prj_pref}_${component}_USE_STATIC)
+		set(sufix )
+	endif()
+
+	set(component_file "${_h2o_com_pref}/${_h2o_target_prefix}${component}-targets.cmake")
+	if(EXISTS "${component_file}")
+		append_target_to_libs("${component_file}" "${_h2o_target_prefix}${component}${sufix}" "${sufix}")
+	elseif(EXISTS "${_h2o_com_pref}/${component}-targets.cmake")
+		append_target_to_libs("${_h2o_com_pref}/${component}-targets.cmake" "${component}${sufix}" "${sufix}")
+	else()
+		message(FATAL_ERROR "${component} component not found (${component_file})")
+	endif()
+
+	unset(sufix)
+	unset(component_file)
+
+endmacro()
+
+
+# work with other componetns
+# depends of components not matter here
+# the user have to do it himself
+foreach(com ${${_h2o_prj_pref}_FIND_COMPONENTS})
+	append_to_libs(${com})
+endforeach()
+
