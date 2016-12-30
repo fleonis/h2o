@@ -39,7 +39,7 @@ SET(LIBRARY_SOVERSION "${LIBRARY_VERSION_MAJOR}.${LIBRARY_VERSION_MINOR}")
 
 SET(CPACK_PACKAGE_CONTACT "hudyaev.alexy@gmail.com")
 SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Alexy Hudayev")
-SET(CPACK_DEB_COMPONENT_INSTALL 1)
+SET(CPACK_DEB_COMPONENT_INSTALL 0)
 SET(LIBH2O_COMPONENT_LOWER "libh2o")
 SET(LIBH2O_DEV_COMPONENT_LOWER "libh2o-dev")
 SET(LIBH2OEL_COMPONENT_LOWER "h2o-eventloop")
@@ -56,19 +56,19 @@ SET(CPACK_DEBIAN_${SERVER_DEV_COMPONENT_NAME}_PACKAGE_DEPENDS "${LIBH2O_COMPONEN
 INCLUDE(GNUInstallDirs)
 
 if(PREFIX_WITH_VERSION)
-	set(install_dir "h2o-${VERSION_MAJOR}.${VERSION_MINOR}/")
-	set(full_install_dir "${CMAKE_INSTALL_PREFIX}/${install_dir}")
-	set(install_libdir "${CMAKE_INSTALL_LIBDIR}/${install_dir}")
-	set(install_datarootdir "${CMAKE_INSTALL_DATAROOTDIR}/${install_dir}")
-	set(install_bindir "${CMAKE_INSTALL_BINDIR}/${install_dir}")
-	set(install_includedir "${CMAKE_INSTALL_INCLUDEDIR}/${install_dir}")
+	set(INSTALL_DIR "h2o-${VERSION_MAJOR}.${VERSION_MINOR}/")
+	set(full_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_DIR}")
+	set(INSTALL_LIBDIR "${CMAKE_INSTALL_LIBDIR}/${INSTALL_DIR}")
+	set(INSTALL_DATAROOTDIR "${CMAKE_INSTALL_DATAROOTDIR}")
+	set(INSTALL_BINDIR "${CMAKE_INSTALL_BINDIR}/${INSTALL_DIR}")
+	set(INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}/${INSTALL_DIR}")
 else()
-	set(install_dir "")
-	set(full_install_dir "${CMAKE_INSTALL_PREFIX}")
-	set(install_libdir "${CMAKE_INSTALL_LIBDIR}")
-	set(install_datarootdir "${CMAKE_INSTALL_DATAROOTDIR}")
-	set(install_bindir "${CMAKE_INSTALL_BINDIR}")
-	set(install_includedir "${CMAKE_INSTALL_INCLUDEDIR}")
+	set(INSTALL_DIR "")
+	set(full_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
+	set(INSTALL_LIBDIR "${CMAKE_INSTALL_LIBDIR}")
+	set(INSTALL_DATAROOTDIR "${CMAKE_INSTALL_DATAROOTDIR}")
+	set(INSTALL_BINDIR "${CMAKE_INSTALL_BINDIR}")
+	set(INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}")
 endif()
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/h2o/version.h)
@@ -199,7 +199,7 @@ IF ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     ENDIF ()
 ENDIF ()
 
-SET(CMAKE_C_FLAGS "-O2 -g ${CC_WARNING_FLAGS} ${CMAKE_C_FLAGS} -DH2O_ROOT=\"${full_install_dir}\" -DH2O_CONFIG_PATH=\"${CMAKE_INSTALL_SYSCONFDIR}/h2o.conf\"")
+SET(CMAKE_C_FLAGS "-O2 -g ${CC_WARNING_FLAGS} ${CMAKE_C_FLAGS} -DH2O_ROOT=\"${full_INSTALL_DIR}\" -DH2O_CONFIG_PATH=\"${CMAKE_INSTALL_SYSCONFDIR}/h2o.conf\"")
 
 SET(LIBYAML_SOURCE_FILES
     deps/yaml/src/api.c
@@ -402,12 +402,12 @@ IF (OPENSSL_FOUND)
         INSTALL(
 			TARGETS libh2o
 			EXPORT "libh2o-targets"
-			DESTINATION "${install_libdir}"
+			DESTINATION "${INSTALL_LIBDIR}"
 			COMPONENT "${LIBH2O_COMPONENT_LOWER}"
 			)
 		INSTALL(
 			EXPORT "libh2o-targets"
-			DESTINATION "${install_libdir}"
+			DESTINATION "${INSTALL_LIBDIR}"
 			COMPONENT "${LIBH2O_COMPONENT_LOWER}"
 			)
     ELSE ()
@@ -417,12 +417,12 @@ IF (OPENSSL_FOUND)
         INSTALL(
 			TARGETS libh2o-evloop
 			EXPORT "libh2o-evloop-targets"
-			DESTINATION "${install_libdir}"
+			DESTINATION "${INSTALL_LIBDIR}"
 			COMPONENT "${LIBH2OEL_COMPONENT_LOWER}"
 			)
 		INSTALL(
 			EXPORT "libh2o-evloop-targets"
-			DESTINATION "${install_libdir}"
+			DESTINATION "${INSTALL_LIBDIR}"
 			COMPONENT "${LIBH2O_COMPONENT_LOWER}"
 			)
     ELSE ()
@@ -513,27 +513,27 @@ TARGET_LINK_LIBRARIES(h2o ${EXTRA_LIBS})
 
 INSTALL(TARGETS h2o
     COMPONENT "${SERVER_COMPONENT_LOWER}"
-    RUNTIME DESTINATION "${install_bindir}"
-    LIBRARY DESTINATION "${install_libdir}"
+    RUNTIME DESTINATION "${INSTALL_BINDIR}"
+    LIBRARY DESTINATION "${INSTALL_LIBDIR}"
     )
 
 IF (NOT WITHOUT_LIBS)
     INSTALL(
         DIRECTORY include/
-        DESTINATION "${install_includedir}"
+        DESTINATION "${INSTALL_INCLUDEDIR}"
         COMPONENT "${H2O_DEV_COMPONENT_LOWER}"
         FILES_MATCHING PATTERN "*.h"
         )
     IF (LIBUV_FOUND)
         INSTALL(
 			FILES "${CMAKE_BINARY_DIR}/libh2o.pc"
-			DESTINATION "${install_libdir}/pkgconfig"
+			DESTINATION "${INSTALL_LIBDIR}/pkgconfig"
 			COMPONENT "${H2O_DEV_COMPONENT_LOWER}"
 			)
     ENDIF ()
     INSTALL (
 		FILES "${CMAKE_BINARY_DIR}/libh2o-evloop.pc"
-		DESTINATION "${install_libdir}/pkgconfig"
+		DESTINATION "${INSTALL_LIBDIR}/pkgconfig"
 		COMPONENT "${H2O_DEV_COMPONENT_LOWER}"
 		)
 ENDIF ()
@@ -546,34 +546,34 @@ INSTALL(
         share/h2o/kill-on-close
         share/h2o/setuidgid
         share/h2o/start_server
-    DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${install_dir}${CMAKE_INSTALL_DATAROOTDIR}/h2o"
+    DESTINATION "${INSTALL_DATAROOTDIR}/h2o"
     COMPONENT "${SERVER_COMPONENT_LOWER}"
     )
 INSTALL(
 	FILES share/h2o/ca-bundle.crt
-	DESTINATION "${install_datarootdir}/h2o"
+	DESTINATION "${INSTALL_DATAROOTDIR}/h2o"
 	COMPONENT "${RUNTIME_COMPONENT_LOWER}"
 	)
 INSTALL(
 	FILES share/h2o/status/index.html
-	DESTINATION "${install_datarootdir}/h2o/status"
+	DESTINATION "${INSTALL_DATAROOTDIR}/h2o/status"
 	COMPONENT "${RUNTIME_COMPONENT_LOWER}"
 	)
 INSTALL(
     DIRECTORY doc/
-    DESTINATION "${install_datarootdir}/doc/h2o"
+    DESTINATION "${INSTALL_DATAROOTDIR}/doc/h2o"
     COMPONENT "${DOCS_COMPONENT_LOWER}"
     PATTERN "Makefile" EXCLUDE PATTERN "README.md" EXCLUDE
     )
 INSTALL(
 	DIRECTORY examples/
-	DESTINATION "${install_datarootdir}/doc/h2o/examples"
+	DESTINATION "${INSTALL_DATAROOTDIR}/doc/h2o/examples"
 	COMPONENT "${EXAMPLES_COMPONENT_LOWER}"
 	)
 IF (WITH_MRUBY)
     INSTALL(
 		DIRECTORY share/h2o/mruby
-		DESTINATION "${install_datarootdir}/h2o"
+		DESTINATION "${INSTALL_DATAROOTDIR}/h2o"
 		COMPONENT "${MRUBY_COMPONENT_LOWER}"
 		)
 ENDIF (WITH_MRUBY)
@@ -651,8 +651,8 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
 
 configure_file("cmake/h2o-config-version.cmake.in" "h2o-config-version.cmake" @ONLY)
 configure_file("cmake/h2o-config.cmake.in" "h2o-config.cmake" @ONLY)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/h2o-config.cmake" "${CMAKE_CURRENT_BINARY_DIR}/h2o-config-version.cmake"
-		DESTINATION "${install_libdir}"
+INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/h2o-config.cmake" "${CMAKE_CURRENT_BINARY_DIR}/h2o-config-version.cmake"
+		DESTINATION "${INSTALL_LIBDIR}"
 		COMPONENT "${LIBH2O_DEV_COMPONENT_LOWER}"
 		)
 
