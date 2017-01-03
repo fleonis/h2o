@@ -13,7 +13,7 @@ endif()
 
 set(_h2o_flib_ver "@VERSION_MAJOR@.@VERSION_MINOR@")
 
-set(_h2o_idir @install_dir@)
+set(_h2o_idir @INSTALL_DIR@)
 set(_h2o_target_prefix @lib_prefix@)
 set(h2o_runtime_dir "@install_runtime_dir@")
 set(h2o_runtime_libs_dir "@install_runtime_libs_dir@")
